@@ -8,8 +8,7 @@ import qualified Data.List as L
 import System.FilePath ((</>))
 import Control.Exception (try, IOException)
 import qualified Data.HashMap.Strict as H
-
-import SolutionHelpers (toTuple, quicksort, uniq, count)
+import SolutionHelpers (toTuple, quicksort, uniq, count, toDf, sign)
 
 
 putSolution :: Show a => String -> a -> IO()
@@ -36,4 +35,20 @@ solution 1 s = do
       m = count $ filter (`elem` la1) sortedlb
       
   putSolution "1b" $ sum . map (\e -> (e * (m H.! e))) $ L.intersect la1 lb1
+
+  
+solution 2 s = do
+  
+  let df = toDf s
+      isOk :: [Int] -> Bool
+      isOk l = fst . foldr fok (True, 0) $ zipWith (-) (l) (tail l)
+        where fok e (False, sgn) = (False, sgn)
+              fok e (True, sgn) | (sgn == 0 || (sign e == sgn)) && abs e >= 1 && abs e <= 3 = (True, sign e)
+                                | otherwise = (False, sgn)
+                                
+      -- isOk l = all $ (<*>l) [isMonotonic]
+      --   where isMonotonic l = foldr (\e acc -> ) 0
+  putSolution "2a" $ length . filter id . map isOk $ df
+  
+  
 solution n _ = putStrLn $ "Problem " ++ show n ++ " not yet implemented !"

@@ -4,4 +4,5 @@ import Lib
 
 main :: IO ()
 main = do
-  mapM_ run [1..25]
+  run 2
+  -- mapM_ run [1..25]
