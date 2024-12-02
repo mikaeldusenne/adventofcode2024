@@ -30,3 +30,9 @@ count = H.fromList . map (\l@(x:xs) -> (x, length l)) . L.group
 
 sign a | a < 0 = -1
        | otherwise = 1
+
+oneoffs :: [Int] -> [[Int]]
+oneoffs = run [] []
+  where run :: [[Int]] -> [Int] -> [Int] -> [[Int]]
+        run acc _ [] = acc
+        run acc left (x:xs) = run ((left ++ xs):acc) (left++[x]) xs

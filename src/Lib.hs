@@ -8,7 +8,7 @@ import qualified Data.List as L
 import System.FilePath ((</>))
 import Control.Exception (try, IOException)
 import qualified Data.HashMap.Strict as H
-import SolutionHelpers (toTuple, quicksort, uniq, count, toDf, sign)
+import SolutionHelpers (toTuple, quicksort, uniq, count, toDf, sign, oneoffs)
 
 
 putSolution :: Show a => String -> a -> IO()
@@ -46,9 +46,13 @@ solution 2 s = do
               fok e (True, sgn) | (sgn == 0 || (sign e == sgn)) && abs e >= 1 && abs e <= 3 = (True, sign e)
                                 | otherwise = (False, sgn)
                                 
-      -- isOk l = all $ (<*>l) [isMonotonic]
-      --   where isMonotonic l = foldr (\e acc -> ) 0
   putSolution "2a" $ length . filter id . map isOk $ df
+
+  let isOk' :: [Int] -> Bool
+      isOk' = any isOk . oneoffs
+
+  putSolution "2b" $ length . filter id . map isOk' $ df
+
   
   
 solution n _ = putStrLn $ "Problem " ++ show n ++ " not yet implemented !"
