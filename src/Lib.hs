@@ -1,14 +1,17 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Lib (
-  solution
+  solution,
+  Solution,
   ) where
 
 import qualified Data.List as L
 import qualified Data.HashMap.Strict as H
-import SolutionHelpers (toTuple, quicksort, uniq, count, toDf, sign, oneoffs)
+import SolutionHelpers (toTuple, quicksort, uniq, count, toDf, sign, oneoffs, splitOn)
+import Data.Either (rights)
 
-  
-solution :: Int -> String -> Either String (Maybe Int, Maybe Int)
+type Solution = (Maybe Int, Maybe Int)
+
+solution :: Int -> String -> Either String Solution
 solution 1 s = Right (Just solution_a, Just solution_b)
   where (la, lb) :: ([Int], [Int]) = unzip . map (toTuple . map (read :: String -> Int) . words) . lines $ s
         (sortedla, sortedlb) = (quicksort la, quicksort lb)
@@ -34,6 +37,18 @@ solution 2 s = Right (Just solution_a, Just solution_b)
         isOk' = any isOk . oneoffs
 
         solution_b = length . filter id . map isOk' $ df
+        
+solution 3 s = Right (solution_a, solution_b)
+          
+  where f s = case (reads s :: [((Int, Int), String)]) of
+                [] -> Left ""
+                [(a, _)] -> Right a
+                l -> Left $ show l
+        sol = sum . map (uncurry (*)) . rights . map f . splitOn "mul"
+        f' = map ((!!0) . splitOn "don't") . splitOn "do()"
 
-  
+        solution_a = Just . sol $ s
+        solution_b = Just . sol . unwords . f' $ s
+
 solution n _ = Left $ "Problem " ++ show n ++ " not yet implemented !"
+

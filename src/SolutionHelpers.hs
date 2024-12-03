@@ -31,8 +31,30 @@ count = H.fromList . map (\l@(x:xs) -> (x, length l)) . L.group
 sign a | a < 0 = -1
        | otherwise = 1
 
+
 oneoffs :: [Int] -> [[Int]]
 oneoffs = run [] []
   where run :: [[Int]] -> [Int] -> [Int] -> [[Int]]
         run acc _ [] = acc
         run acc left (x:xs) = run ((left ++ xs):acc) (left++[x]) xs
+
+
+spann :: Eq α => [α] -> [α] -> ([α], [α])
+spann s = run []
+  where run ans [] = (reverse ans, [])
+        run ans l'@(x:xs) | s `L.isPrefixOf` l' = (reverse ans, l')
+                   | otherwise = run (x:ans) xs
+
+
+spann' :: Eq α => ([α] -> Bool) -> [α] -> ([α], [α])
+spann' f = run []
+  where run ans [] = (reverse ans, [])
+        run ans l'@(x:xs) | f l' = (reverse ans, l')
+                   | otherwise = run (x:ans) xs
+
+
+splitOn :: Eq α => [α] -> [α] -> [[α]]
+splitOn _ [] = []
+splitOn sep l = a : splitOn sep (drop (length sep) b)
+  where (a, b) = spann sep l
+  
