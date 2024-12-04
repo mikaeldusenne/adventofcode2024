@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables, LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables, LambdaCase, BangPatterns #-}
 module Main (main) where
 
 import Lib (Solution, solution)
@@ -9,6 +9,8 @@ import Data.List (intercalate)
 import SolutionHelpers
 import Data.Either (rights)
 import qualified Data.List as L
+import Data.List (foldl')
+import qualified Data.HashMap.Strict as H
 
 
 putSolution :: Show a => String -> a -> IO()
@@ -28,12 +30,13 @@ run n  = try @IOException  (loadData n) >>= \case
       Right result -> return $ init . unlines $ zipWith showResult "ab" (tupleToList result)
         where showResult k val = let prettyprob = "problem " ++ show n ++ [k] ++ " : " in 
                 case val of (Just e) ->  prettyprob ++ show e
-                            Nothing ->  prettyprob ++ " not implemented yet"
+                            Nothing ->  prettyprob ++ "not implemented yet"
 
 
+        
+-- map (map (v V.!)) $
 main :: IO ()
 main = do
   let sep = "\n────────────────────────────────\n"
   mapM run [1..25] >>= (putStrLn . (sep++) .(++sep) . intercalate sep)
-  -- s <- loadData 3
-
+  -- s <- loadData 4

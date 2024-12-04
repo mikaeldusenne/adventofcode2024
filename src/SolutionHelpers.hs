@@ -58,3 +58,30 @@ splitOn _ [] = []
 splitOn sep l = a : splitOn sep (drop (length sep) b)
   where (a, b) = spann sep l
   
+
+flatMap :: (α -> [β]) -> [α] -> [β]
+flatMap = (concat .) . map
+
+-- down right
+diags l = fvert (tail l) ++ fhoriz l
+  where f = map head . filter (not . null) . zipWith drop [0..]
+        fhoriz [] = []
+        fhoriz l = f l : fhoriz (filter (not . null) . map tail $ l)
+        fvert [] = []
+        fvert l = f l : fvert (tail l)
+
+transpose :: [[α]] -> [[α]]
+transpose ([]:_) = []
+transpose l = a : transpose b
+  where tuplecons (a,b) (c,d) = (a:c , b:d)
+        -- (a,b) = foldr tuplecons ([],[]) $ map headNtail $ l
+        (a,b) = foldr (tuplecons . headNtail) ([],[]) l
+        headNtail (x:xs) = (x,xs)
+
+
+replaceDefault z m = go []
+  where go acc [] = reverse acc
+        go acc (x:xs) = go (H.lookupDefault z x m : acc) xs
+
+
+findIndices x xs = map snd $ filter ((==x) . fst) $ zip xs [0..]

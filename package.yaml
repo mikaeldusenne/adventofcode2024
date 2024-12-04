@@ -24,7 +24,6 @@ dependencies:
 - filepath
 - unordered-containers
 - hashable
-# - req
 
 default-extensions:
     OverloadedStrings
