@@ -6,6 +6,10 @@ import qualified Data.HashMap.Strict as H
 import qualified Data.List as L
 import Data.List (foldl')
 
+
+readInt :: String -> Int
+readInt = read
+
 toDf :: String -> [[Int]]
 toDf = map (map (read :: String -> Int) . words) . lines
 
@@ -53,6 +57,14 @@ spann' f = run []
                    | otherwise = run (x:ans) xs
 
 
+split :: (Eq α) => α -> [α] -> [[α]]
+split _ [] = []
+split sep l =
+  let (a,b) = break (==sep) l in
+  case b of
+    [] -> [a]
+    _ -> a : (split sep $ tail b)
+
 splitOn :: Eq α => [α] -> [α] -> [[α]]
 splitOn _ [] = []
 splitOn sep l = a : splitOn sep (drop (length sep) b)
@@ -85,3 +97,24 @@ replaceDefault z m = go []
 
 
 findIndices x xs = map snd $ filter ((==x) . fst) $ zip xs [0..]
+
+safeHead [] = Nothing
+safeHead (x:_) = Just x
+
+none :: (Foldable f) => (α -> Bool) -> f α -> Bool
+none = (not.) . any
+
+
+reduce :: (a -> a -> a) -> [a] -> a
+reduce _ [] = error "reduce empty list"
+reduce _ [x] = error $ "reduce single element"
+reduce f l = foldl' f (head l) (tail l)
+
+flatten :: [[a]] -> [a]
+flatten = reduce (++)
+
+iter :: [b] -> [(Int, b)]
+iter = zip [1..]
+
+iterWith :: (Int -> α -> c) -> [α] -> [c]
+iterWith = ($ [1..]) . zipWith 

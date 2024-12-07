@@ -12,7 +12,6 @@ import qualified Data.List as L
 import Data.List (foldl')
 import qualified Data.HashMap.Strict as H
 
-
 putSolution :: Show a => String -> a -> IO()
 putSolution p = putStrLn . (("Solution " ++ p ++ " : ")++) . show
 
@@ -20,7 +19,6 @@ loadData :: Int -> IO String
 loadData n = (>>=readFile) $ (</>(show n++".csv")) <$> getEnv "ADVENTCALENDAR2024_DATA_DIR" 
 
 tupleToList (a, b) = [a, b]
-
 
 run :: Int -> IO String
 run n  = try @IOException  (loadData n) >>= \case
@@ -33,10 +31,11 @@ run n  = try @IOException  (loadData n) >>= \case
                             Nothing ->  prettyprob ++ "not implemented yet"
 
 
-        
--- map (map (v V.!)) $
 main :: IO ()
 main = do
   let sep = "\n────────────────────────────────\n"
   mapM run [1..25] >>= (putStrLn . (sep++) .(++sep) . intercalate sep)
-  -- s <- loadData 4
+  -- s <- loadData 5
+
+  print "done."
+

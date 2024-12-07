@@ -24,6 +24,7 @@ dependencies:
 - filepath
 - unordered-containers
 - hashable
+- parallel
 
 default-extensions:
     OverloadedStrings
@@ -42,6 +43,9 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
+- -threaded
+- -rtsopts
+- -with-rtsopts=-N
 
 library:
   source-dirs: src

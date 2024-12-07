@@ -9,8 +9,46 @@ import qualified Data.HashMap.Strict as H
 import SolutionHelpers
 import Data.Either (rights)
 import Data.List (foldl')
+import Control.Parallel.Strategies
 
 type Solution = (Maybe Int, Maybe Int)
+
+data Position = Position {x :: Int, y :: Int}
+  deriving (Show, Eq)
+
+data Direction = DD | DR | DU | DL
+  deriving (Show, Eq, Ord, Enum, Bounded)
+
+data PosDir = PosDir {pos :: Position, dir :: Direction}
+  deriving (Show, Eq)
+
+dx :: Direction -> Int
+dx DU = 0
+dx DR = 1
+dx DD = 0
+dx DL = -1
+
+dy :: Direction -> Int
+dy DU = -1
+dy DR = 0
+dy DD = 1
+dy DL = 0
+
+
+rotate :: Direction -> Direction
+rotate d = if d == maxBound 
+           then minBound 
+           else succ d
+                
+rotatePosDir PosDir{dir=dir, pos=pos} = PosDir{dir=rotate dir, pos=pos}
+
+data Reason = Exit | Loop
+  deriving (Show, Eq)
+
+data Path = Path{reason::Reason, path::[PosDir]}
+  deriving (Show, Eq)
+
+
 
 solution :: Int -> String -> Either String Solution
 solution 1 s = Right (Just solution_a, Just solution_b)
@@ -103,6 +141,40 @@ solution 4 s = Right (Just solution_a, Just solution_b)
                 neighbours :: Int -> [[Int]]
                 neighbours i = map (map (prepared !!)) $ [[i-(w+1), i+(w+1)], [i-(w-1), i+(w-1)]]
         solution_b = countXMAS width height prepared
+
+
+
+solution 5 s = Right (Just solution_a, Just solution_b)
+  where [r, m] = splitOn "\n\n" s
+        fread :: Char -> String -> [[String]]
+        fread c = map (split c) . lines
+        rules :: [[String]]
+        rules = fread '|' r
+        manuals = fread ',' m
+        isOk [] = True
+        isOk (x:xs) = ok && isOk xs
+          where ok = none (\[a, b] -> (b==x) && (a `elem`xs)) rules
+        midPage l = l !! ((`div`2) . length $ l)
+        okManuals = filter isOk $ manuals
+        notOkManuals = filter (not . isOk) manuals
+        insertAfter a b [] = [b]
+        insertAfter a b (x:xs) | x == a = x:b:xs
+                               | otherwise = x:insertAfter a b xs
+                               
+        sortManual :: [String] -> [String]
+        sortManual [] = []
+        sortManual l@(x:xs) = case match of
+          Nothing -> (x : sortManual xs)
+          Just e -> (sortManual $ insertAfter e x xs)
+          where match :: Maybe String
+                match = (head<$>) .safeHead . filter (\[a, b] -> (b==x) && (a`elem`xs)) $ rules
+
+        solution_a = sum . map (readInt . midPage) $ okManuals
+        solution_b = sum . map (readInt . midPage) $ map sortManual $ notOkManuals
+
+
+
+
 
 solution n _ = Left $ "Problem " ++ show n ++ " not yet implemented !"
 
