@@ -173,6 +173,45 @@ solution 5 s = Right (Just solution_a, Just solution_b)
         solution_b = sum . map (readInt . midPage) $ map sortManual $ notOkManuals
 
 
+solution 6 s = Right (Just solution_a, Just solution_b)
+  where l :: [[Char]]
+        l = lines s
+        h = length l
+        w = length $ head l
+        ss = filter (/='\n') $ s
+        board = filter ((/='.') . snd) . flatten . iterWith (\row l -> iterWith (\col c -> ((row, col), c)) l) $ l
+  
+        startPos :: PosDir
+        startPos = PosDir (uncurry Position . fst . head . filter ((=='^') . snd) $ board) DL
+        
+        obst :: [Position]
+        obst = map (uncurry Position . fst) . filter ((=='#') . snd) $ board
+  
+        walk :: [Position] -> Path
+        walk obst = move [startPos]
+          where move :: [PosDir] -> Path
+                move l@(p@PosDir{pos=ppp@Position{x=x, y=y}, dir=dir}:ps)
+                  | isOut = Path Exit ps
+                  | isLoop = Path Loop l
+                  | isObst = move ((rotatePosDir $ head ps):tail ps)
+                  | otherwise = move (PosDir nextPos dir:l)
+                  where isOut = (x<=0) || (x>w) || (y<=0) || (y>h)
+                        nextPos = Position (x + dx dir) (y + dy dir)
+                        nextDir = rotate dir
+                        isObst = ppp `elem` obst
+                        isLoop = p `elem` ps
+        
+        fill :: [Position] -> Char -> [[Char]] -> [[Char]]
+        fill ps c = iterWith (\row l -> iterWith (\col cc -> if (Position{x=row, y=col}`elem`ps) then c else cc) l)
+      
+        p@Path{reason=r, path=path} = walk obst
+      
+        solution_a = length $ uniq . map pos $ path
+        possibleNewObstacles = uniq $ filter (\e -> e /= pos startPos) . map pos $ path
+        -- this is too computexpensive
+        loopObsts = filter ((==Loop).reason) $ parMap rseq (walk . (:obst)) possibleNewObstacles
+        
+        solution_b = length loopObsts
 
 
 
