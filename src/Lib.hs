@@ -213,6 +213,20 @@ solution 6 s = Right (Just solution_a, Just solution_b)
         
         solution_b = length loopObsts
 
+solution 7 s = Right (Just solution_a, Just solution_b)
+  where l :: [(Int, [Int])]
+        l = map (headNtail . map readInt . words . filter (/=':')) . lines $ s
+        ops = [(*), (+)]
+        
+        search ops sol (x:xs) = go x xs
+          where go total [] = total == sol
+                go total (x:xs) = any (\o -> go (o total x) xs) $ ops
+                
+        ops2 = (\a b -> readInt (show a ++ show b)) : ops
+        runops os = sum . map fst $ filter (uncurry (search os)) $ l
+        
+        solution_a = runops ops
+        solution_b = runops ops2
 
 
 solution n _ = Left $ "Problem " ++ show n ++ " not yet implemented !"

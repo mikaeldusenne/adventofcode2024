@@ -34,8 +34,9 @@ run n  = try @IOException  (loadData n) >>= \case
 main :: IO ()
 main = do
   let sep = "\n────────────────────────────────\n"
-  mapM run [1..25] >>= (putStrLn . (sep++) .(++sep) . intercalate sep)
-  -- s <- loadData 5
-
+  -- mapM run [1..25] >>= (putStrLn . (sep++) .(++sep) . intercalate sep)
+  run 7 >>= putStrLn
+  -- s <- loadData 7
   print "done."
+
 

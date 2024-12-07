@@ -88,8 +88,8 @@ transpose l = a : transpose b
   where tuplecons (a,b) (c,d) = (a:c , b:d)
         -- (a,b) = foldr tuplecons ([],[]) $ map headNtail $ l
         (a,b) = foldr (tuplecons . headNtail) ([],[]) l
-        headNtail (x:xs) = (x,xs)
 
+headNtail (x:xs) = (x,xs)
 
 replaceDefault z m = go []
   where go acc [] = reverse acc
