@@ -6,6 +6,21 @@ import qualified Data.HashMap.Strict as H
 import qualified Data.List as L
 import Data.List (foldl')
 
+type Coord = (Int, Int)
+type BoardPiece = (Coord, Char)
+
+data Pos = Pos Int Int
+  deriving (Show, Eq)
+
+instance Num Pos where
+  (Pos x1 y1) + (Pos x2 y2) = Pos (x1 + x2) (y1 + y2)
+  (Pos x1 y1) * (Pos x2 y2) = Pos (x1 * x2) (y1 * y2)
+  negate (Pos x y) = Pos (-x) (-y)
+  abs (Pos x y) = Pos (abs x) (abs y)
+  signum (Pos x y) = Pos (signum x) (signum y)
+  -- fromInteger n = Pos (fromInteger n) 0
+
+posToTuple (Pos x y) = (x, y)
 
 readInt :: String -> Int
 readInt = read
@@ -95,11 +110,15 @@ replaceDefault z m = go []
   where go acc [] = reverse acc
         go acc (x:xs) = go (H.lookupDefault z x m : acc) xs
 
+replace a b = map (\x -> if x == a then b else x)
 
 findIndices x xs = map snd $ filter ((==x) . fst) $ zip xs [0..]
 
 safeHead [] = Nothing
 safeHead (x:_) = Just x
+
+headOrDefault d [] = d
+headOrDefault _ (x:_) = x
 
 none :: (Foldable f) => (α -> Bool) -> f α -> Bool
 none = (not.) . any
@@ -107,7 +126,7 @@ none = (not.) . any
 
 reduce :: (a -> a -> a) -> [a] -> a
 reduce _ [] = error "reduce empty list"
-reduce _ [x] = error $ "reduce single element"
+reduce _ [_] = error "reduce single element"
 reduce f l = foldl' f (head l) (tail l)
 
 flatten :: [[a]] -> [a]
@@ -118,3 +137,37 @@ iter = zip [1..]
 
 iterWith :: (Int -> α -> c) -> [α] -> [c]
 iterWith = ($ [1..]) . zipWith 
+
+boardPositions :: [Char] -> [Char] -> [((Int, Int), Char)]
+boardPositions ignore = filter (not . (`elem`ignore) . snd) . flatten . iterWith (\row l -> iterWith (\col c -> ((row, col), c)) l) . lines
+
+
+-- isInBoard size (a, b) = (a>=0) && (a<size) && (b>=0) && (b<size)
+isInBoard size (a, b) = (a>0) && (a<=size) && (b>0) && (b<=size)
+
+drawBoard :: Int -> Char -> [BoardPiece] -> [Char]
+drawBoard size filler pieces = unlines (
+  map (\row -> map (\col -> pieceAt (row, col)) [0..size])
+  [0..size]
+  )
+  where repn = replicate size
+        pieceAt p = headOrDefault filler . map snd . filter ((==p) . fst) $ pieces
+
+
+append = flip (++) . (:[])
+
+groupBy :: (Eq b,Ord a) => (a -> b) -> [a] -> [[a]]
+groupBy f = foldl' insert []
+  where insert acc e = walk acc
+          where walk [] = [[e]]
+                walk (l@(x:_):ls) | f x == f e = append e l : ls
+                                  | otherwise = l : walk ls
+
+tails :: [α] -> [[α]]
+tails [] = []
+tails l@(_:xs) = l : tails xs
+
+pairs :: [α] -> [(α, α)]
+pairs l = [(x, y) | (x:ys) <- tails l, y <- ys]
+
+recurse f start = start : recurse f (f start)

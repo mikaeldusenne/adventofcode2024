@@ -229,5 +229,23 @@ solution 7 s = Right (Just solution_a, Just solution_b)
         solution_b = runops ops2
 
 
+solution 8 s = Right (Just solution_a, Just solution_b)
+  where boardSize = length $ lines s
+        pieces = boardPositions ".#" $ s
+        -- todo : make this readable
+        allAntinodes f = uniq . flatten . map snd . map (\l@((_, c):_) -> (c, (filter (isInBoard boardSize) . map posToTuple . flatten . map (uncurry f ) . pairs . map (uncurry Pos . fst) $ l ))) $ groupBy snd pieces
+      
+        antinodes ca cb = [ca - δ, cb + δ]
+          where δ = cb - ca
+        
+        antinodes2 :: Int -> Pos -> Pos -> [Pos]
+        antinodes2 boardSize ca cb = flatten . map (takeWhile (isInBoard boardSize . posToTuple))
+                                     $ [recurse (\e -> e - δ) ca, recurse (+ δ) cb]
+          where δ = cb - ca
+      
+        solution_a = length (allAntinodes antinodes)
+        solution_b = length (allAntinodes $ antinodes2 boardSize)
+
+
 solution n _ = Left $ "Problem " ++ show n ++ " not yet implemented !"
 

@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables, LambdaCase, BangPatterns #-}
+{-# LANGUAGE ScopedTypeVariables, LambdaCase, BangPatterns, TupleSections #-}
 module Main (main) where
 
 import Lib (Solution, solution)
@@ -34,9 +34,9 @@ run n  = try @IOException  (loadData n) >>= \case
 main :: IO ()
 main = do
   let sep = "\n────────────────────────────────\n"
-  -- mapM run [1..25] >>= (putStrLn . (sep++) .(++sep) . intercalate sep)
-  run 7 >>= putStrLn
-  -- s <- loadData 7
+  mapM run [1..25] >>= (putStrLn . (sep++) .(++sep) . intercalate sep)
+  -- run 8  >>= putStrLn
+  -- s <- loadData 8
+  
   print "done."
-
 
